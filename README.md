@@ -174,3 +174,23 @@ Proyecto personal de aprendizaje. Úsalo como base para tus propios proyectos.
 ---
 
 **Desarrollado con ✨ y 🪐**
+
+## 🔒 Nota sobre seguridad: sanitización de HTML generado por la IA
+
+La aplicación genera contenido HTML usando un modelo de lenguaje y lo devuelve al cliente.
+Para reducir riesgos de XSS, el endpoint `app/api/generate/route.ts` sanitiza el HTML en el servidor
+antes de enviarlo. Se utiliza la librería `sanitize-html` con una política conservadora (`SANITIZE_OPTIONS`) que:
+
+- Permite solo etiquetas básicas (p. ej. `h2`, `p`, `ul`, `li`, `strong`, `em`, `br`, `a`).
+- Restringe atributos permitidos (solo `href`, `target`, `rel` en enlaces) y esquemas seguros (`http`, `https`, `mailto`, `tel`).
+- Normaliza enlaces para añadir `rel="nofollow noopener noreferrer"` y `target="_blank"`.
+
+Recomendaciones para producción:
+
+- Revisa y ajusta `SANITIZE_OPTIONS` según el HTML que realmente necesites permitir (si necesitas estilos inline,
+   clases o más etiquetas, explícitalo y añade tests).
+- Considera añadir validación adicional de contenido (longitud máxima, blacklist de frases) y rate-limiting
+   para proteger la API contra abusos.
+- No confíes en la sanitización como única defensa: aplica políticas de Content Security Policy (CSP) en producción
+   y verifica entradas y respuestas críticas en el servidor.
+
