@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import sanitizeHtml from 'sanitize-html'
+import { SANITIZE_OPTIONS } from './sanitize-options'
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +23,10 @@ export async function POST(request: NextRequest) {
       birthPlace
     })
 
-    return NextResponse.json({ reading })
+    // Sanitizar HTML generado para reducir riesgo de XSS antes de enviarlo al cliente
+  const sanitizedReading = sanitizeHtml(reading, SANITIZE_OPTIONS)
+
+    return NextResponse.json({ reading: sanitizedReading })
   } catch (error) {
     console.error('Error generating reading:', error)
     return NextResponse.json(
@@ -184,3 +189,5 @@ function getSunSign(month: number, day: number): string {
   if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return 'Acuario'
   return 'Piscis'
 }
+
+// SANITIZE_OPTIONS moved to `sanitize-options.ts` to avoid exporting non-route symbols from a Next route file.
